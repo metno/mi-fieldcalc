@@ -33,6 +33,7 @@
 #include <mi_fieldcalc/FieldCalculations.h>
 
 namespace py = pybind11;
+namespace fc = miutil::fieldcalc;
 
 namespace {
 
@@ -51,99 +52,118 @@ bool same_dims(const npa_t& a1, const npa_t& a2)
   return true;
 }
 
-py::object py_abshum(npa_t t, npa_t rhum)
+template<typename T>
+inline bool same_dims(const npa_t&, T)
 {
-  if (t.ndim() != 2)
+  return true;
+}
+
+template <typename T2, typename... TN>
+bool same_dims(npa_t var1, T2 var2, TN... var3)
+{
+  return same_dims(var1, var2) && same_dims(var1, var3 ...);
+}
+
+inline const float* extract(npa_t npa) { return npa.data(); }
+
+template<typename T>
+inline T extract(const T& t) { return t; }
+
+template <typename F, typename T1, typename ... TN>
+py::object py_wrap_2d(F f, float undef, T1 a1, TN ... an)
+{
+  if (a1.ndim() != 2 || !same_dims(a1, an ...))
     return py::none();
 
+  const py::array::ShapeContainer shp1(a1.shape(), a1.shape() + a1.ndim());
+  py::array_t<float> result(shp1);
+
+  const int nx = a1.shape(0), ny = a1.shape(1);
   miutil::ValuesDefined fDefined = miutil::SOME_DEFINED;
-  const float undef = miutil::UNDEF;
-  const int nx = t.shape(0), ny = t.shape(1);
-  npa_t abshum({nx, ny});
 
-  if (!(same_dims(t, rhum) && same_dims(t, abshum)))
+  if (!f(nx, ny, extract(a1), extract(an) ..., result.mutable_data(), fDefined, undef))
     return py::none();
 
-  if (!miutil::fieldcalc::abshum(nx, ny, t.data(), rhum.data(), abshum.mutable_data(), fDefined, undef))
-    return py::none();
+  return std::move(result);
+}
 
-  return std::move(abshum);
+py::object py_kIndex(npa_t t500, npa_t t700, npa_t rh700, npa_t t850, npa_t rh850,
+            float p500, float p700, float p850, int compute, float undef)
+{
+  return py_wrap_2d(fc::kIndex, undef, t500,  t700,  rh700,  t850,  rh850, p500, p700, p850, compute);
+}
+
+py::object py_ductingIndex(npa_t t850, npa_t rh850, float p850, int compute, float undef)
+{
+  return py_wrap_2d(fc::ductingIndex, undef, t850, rh850, p850, compute);
+}
+
+py::object py_showalterIndex(npa_t t500, npa_t t850, npa_t rh850, float p500, float p850, int compute, float undef)
+{
+  return py_wrap_2d(fc::showalterIndex, undef, t500, t850, rh850, p500, p850, compute);
+}
+
+py::object py_boydenIndex(npa_t t700, npa_t z700, npa_t z1000, float p700, float p1000, int compute, float undef)
+{
+  return py_wrap_2d(fc::boydenIndex, undef, t700, z700, z1000, p700, p1000, compute);
+}
+
+py::object py_sweatIndex(npa_t t850, npa_t t500, npa_t td850, npa_t td500, npa_t u850, npa_t v850,
+                npa_t u500, npa_t v500, float undef)
+{
+  return py_wrap_2d(fc::sweatIndex, undef, t850, t500, td850, td500, u850, v850, u500, v500);
+}
+
+py::object py_seaSoundSpeed(npa_t t, npa_t s, float z, int compute, float undef)
+{
+  return py_wrap_2d(fc::seaSoundSpeed, undef, t, s, z, compute);
+}
+
+py::object py_cvtemp(npa_t tinp, int compute, float undef)
+{
+  return py_wrap_2d(fc::cvtemp, undef, tinp, compute);
+}
+
+py::object py_cvhum(npa_t t, npa_t huminp, const std::string& unit, int compute, float undef)
+{
+    return py_wrap_2d(fc::cvhum, undef, t, huminp, unit, compute);
+}
+
+py::object py_abshum(npa_t t, npa_t rhum, float undef)
+{
+  return py_wrap_2d(fc::abshum, undef, t, rhum);
+}
+
+py::object py_windCooling(npa_t t, npa_t u, npa_t v, int compute, float undef)
+{
+  return py_wrap_2d(fc::windCooling, undef, t, u, v, compute);
+}
+
+py::object py_underCooledRain(npa_t precip, npa_t snow, npa_t tk, float precipMin, float snowRateMax, float tcMax, float undef)
+{
+  return py_wrap_2d(fc::underCooledRain, undef, precip, snow, tk, precipMin, snowRateMax, tcMax);
 }
 
 py::object py_vesselIcingOverland(npa_t airtemp, npa_t seatemp, npa_t u, npa_t v, npa_t sal, npa_t aice, float undef)
 {
-#define SAME_DIMS(array) same_dims(airtemp, array)
-  if (!(SAME_DIMS(seatemp) && SAME_DIMS(u) && SAME_DIMS(v) && SAME_DIMS(sal) && SAME_DIMS(aice)))
-    return py::none();
-#undef SAME_DIMS
-
-  miutil::ValuesDefined fDefined = miutil::SOME_DEFINED;
-  const int nx = airtemp.shape(0), ny = airtemp.shape(1);
-  const py::array::ShapeContainer shp(airtemp.shape(), airtemp.shape() + airtemp.ndim());
-  py::array_t<float> icing(shp);
-  if (miutil::fieldcalc::vesselIcingOverland(nx, ny, airtemp.data(), seatemp.data(), u.data(), v.data(), sal.data(), aice.data(),
-                                             icing.mutable_data(), fDefined, undef))
-    return std::move(icing);
-  else
-    return py::none();
+  return py_wrap_2d(fc::vesselIcingOverland, undef, airtemp, seatemp, u, v, sal, aice);
 }
 
 py::object py_vesselIcingMertins(npa_t airtemp, npa_t seatemp, npa_t u, npa_t v, npa_t sal, npa_t aice, float undef)
 {
-#define SAME_DIMS(array) same_dims(airtemp, array)
-  if (!(SAME_DIMS(seatemp) && SAME_DIMS(u) && SAME_DIMS(v) && SAME_DIMS(sal) && SAME_DIMS(aice)))
-    return py::none();
-#undef SAME_DIMS
-
-  miutil::ValuesDefined fDefined = miutil::SOME_DEFINED;
-  const int nx = airtemp.shape(0), ny = airtemp.shape(1);
-  const py::array::ShapeContainer shp(airtemp.shape(), airtemp.shape() + airtemp.ndim());
-  py::array_t<float> icing(shp);
-  if (miutil::fieldcalc::vesselIcingMertins(nx, ny, airtemp.data(), seatemp.data(), u.data(), v.data(), sal.data(), aice.data(),
-                                            icing.mutable_data(), fDefined, undef))
-    return std::move(icing);
-  else
-    return py::none();
+  return py_wrap_2d(fc::vesselIcingMertins, undef, airtemp, seatemp, u, v, sal, aice);
 }
 
 py::object py_vesselIcingModStall(npa_t sal, npa_t wave, npa_t x_wind, npa_t y_wind, npa_t airtemp, npa_t rh, npa_t sst, npa_t p, npa_t Pw, npa_t aice,
                                   npa_t depth, float vs, float alpha, float zmin, float zmax, float undef)
 {
-#define SAME_DIMS(array) same_dims(sal, array)
-  if (!(SAME_DIMS(wave) && SAME_DIMS(x_wind) && SAME_DIMS(y_wind) && SAME_DIMS(airtemp) && SAME_DIMS(rh) && SAME_DIMS(sst) && SAME_DIMS(p) && SAME_DIMS(Pw) &&
-        SAME_DIMS(aice) && SAME_DIMS(depth)))
-    return py::none();
-#undef SAME_DIMS
-
-  miutil::ValuesDefined fDefined = miutil::SOME_DEFINED;
-  const int nx = sal.shape(0), ny = sal.shape(1);
-  const py::array::ShapeContainer shp(sal.shape(), sal.shape() + sal.ndim());
-  py::array_t<float> icing(shp);
-  if (miutil::fieldcalc::vesselIcingModStall(nx, ny, sal.data(), wave.data(), x_wind.data(), y_wind.data(), airtemp.data(), rh.data(), sst.data(), p.data(), Pw.data(),
-                                             aice.data(), depth.data(), icing.mutable_data(), vs, alpha, zmin, zmax, fDefined, undef))
-    return std::move(icing);
-  else
-    return py::none();
+  return py_wrap_2d(fc::vesselIcingModStall, undef, sal, wave, x_wind, y_wind, airtemp, rh, sst, p, Pw, aice, depth, vs, alpha, zmin, zmax);
 }
 
 py::object py_vesselIcingMincog(npa_t sal, npa_t wave, npa_t x_wind, npa_t y_wind, npa_t airtemp, npa_t rh, npa_t sst, npa_t p, npa_t Pw, npa_t aice,
-                                npa_t depth, float vs, float alpha, float zmin, float zmax, float alt, float undef)
+                                npa_t depth, float vs, float alpha, float zmin, float zmax, int alt, float undef)
 {
-#define SAME_DIMS(array) same_dims(sal, array)
-  if (!(SAME_DIMS(wave) && SAME_DIMS(x_wind) && SAME_DIMS(y_wind) && SAME_DIMS(airtemp) && SAME_DIMS(rh) && SAME_DIMS(sst) && SAME_DIMS(p) && SAME_DIMS(Pw) &&
-        SAME_DIMS(aice) && SAME_DIMS(depth)))
-    return py::none();
-#undef SAME_DIMS
-
-  miutil::ValuesDefined fDefined = miutil::SOME_DEFINED;
-  const int nx = sal.shape(0), ny = sal.shape(1);
-  const py::array::ShapeContainer shp(sal.shape(), sal.shape() + sal.ndim());
-  py::array_t<float> icing(shp);
-  if (miutil::fieldcalc::vesselIcingMincog(nx, ny, sal.data(), wave.data(), x_wind.data(), y_wind.data(), airtemp.data(), rh.data(), sst.data(), p.data(), Pw.data(),
-                                           aice.data(), depth.data(), icing.mutable_data(), vs, alpha, zmin, zmax, alt, fDefined, undef))
-    return std::move(icing);
-  else
-    return py::none();
+  return py_wrap_2d(fc::vesselIcingMincog, undef, sal, wave, x_wind, y_wind, airtemp, rh, sst, p, Pw, aice, depth, vs, alpha, zmin, zmax, alt);
 }
 
 } // namespace
@@ -157,10 +177,24 @@ PYBIND11_MODULE(mi_fieldcalc, m)
           .value("SOME_DEFINED", miutil::SOME_DEFINED);
   // clang-format on
 
-  m.def("abshum", py_abshum);
+#define M_DEF_FC(x) m.def(#x, py_ ## x)
+  M_DEF_FC(kIndex);
+  M_DEF_FC(ductingIndex);
+  M_DEF_FC(showalterIndex);
+  M_DEF_FC(boydenIndex);
+  M_DEF_FC(sweatIndex);
 
-  m.def("vesselIcingOverland", py_vesselIcingOverland);
-  m.def("vesselIcingMertins", py_vesselIcingMertins);
-  m.def("vesselIcingModStall", py_vesselIcingModStall);
-  m.def("vesselIcingMincog", py_vesselIcingMincog);
+  M_DEF_FC(seaSoundSpeed);
+
+  M_DEF_FC(cvtemp);
+  M_DEF_FC(cvhum);
+  M_DEF_FC(abshum);
+
+  M_DEF_FC(windCooling);
+  M_DEF_FC(underCooledRain);
+
+  M_DEF_FC(vesselIcingOverland);
+  M_DEF_FC(vesselIcingMertins);
+  M_DEF_FC(vesselIcingModStall);
+  M_DEF_FC(vesselIcingMincog);
 }

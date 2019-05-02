@@ -88,37 +88,37 @@ TEST(FieldCalculationsTest, XLevelHum)
 
     float humout = 2*UNDEF;
     miutil::ValuesDefined fDefined = miutil::ALL_DEFINED;
-    EXPECT_TRUE(miutil::fieldcalc::alevelhum(p.cah, 1, 1, &p.t, &p.humin, &p.p, &humout, fDefined, UNDEF, "celsius"));
+    EXPECT_TRUE(miutil::fieldcalc::alevelhum(1, 1, &p.t, &p.humin, &p.p, "celsius", p.cah, &humout, fDefined, UNDEF));
     EXPECT_NEAR(p.expect, humout, p.near) << "alevelhum C i=" << i << " compute=" << p.cah;
     EXPECT_EQ(miutil::ALL_DEFINED, fDefined);
 
     humout = 2*UNDEF;
     fDefined = miutil::ALL_DEFINED;
-    EXPECT_TRUE(miutil::fieldcalc::hlevelhum(p.cah, 1, 1, &p.t, &p.humin, &p.p, &humout, alevel, blevel, fDefined, UNDEF, "celsius"));
+    EXPECT_TRUE(miutil::fieldcalc::hlevelhum(1, 1, &p.t, &p.humin, &p.p, alevel, blevel, "celsius", p.cah, &humout, fDefined, UNDEF));
     EXPECT_NEAR(p.expect, humout, p.near) << "hlevelhum C i=" << i << " compute=" << p.cah;
     EXPECT_EQ(miutil::ALL_DEFINED, fDefined);
 
     humout = 2*UNDEF;
     fDefined = miutil::ALL_DEFINED;
-    EXPECT_TRUE(miutil::fieldcalc::plevelhum(p.cp, 1, 1, &p.t, &p.humin, &humout, p.p, fDefined, UNDEF, "celsius"));
+    EXPECT_TRUE(miutil::fieldcalc::plevelhum(1, 1, &p.t, &p.humin, p.p, "celsius", p.cp, &humout, fDefined, UNDEF));
     EXPECT_NEAR(p.expect, humout, p.near) << "plevelhum C i=" << i << " compute=" << p.cp;
     EXPECT_EQ(miutil::ALL_DEFINED, fDefined);
 
     humout = 2*UNDEF;
     fDefined = miutil::SOME_DEFINED;
-    EXPECT_TRUE(miutil::fieldcalc::alevelhum(p.cah, 1, 1, &p.t, &p.humin, &p.p, &humout, fDefined, UNDEF, "celsius"));
+    EXPECT_TRUE(miutil::fieldcalc::alevelhum(1, 1, &p.t, &p.humin, &p.p, "celsius", p.cah, &humout, fDefined, UNDEF));
     EXPECT_NEAR(p.expect, humout, p.near) << "alevelhum C i=" << i << " compute=" << p.cah;
     EXPECT_EQ(miutil::ALL_DEFINED, fDefined);
 
     humout = 2*UNDEF;
     fDefined = miutil::SOME_DEFINED;
-    EXPECT_TRUE(miutil::fieldcalc::hlevelhum(p.cah, 1, 1, &p.t, &p.humin, &p.p, &humout, alevel, blevel, fDefined, UNDEF, "celsius"));
+    EXPECT_TRUE(miutil::fieldcalc::hlevelhum(1, 1, &p.t, &p.humin, &p.p, alevel, blevel, "celsius", p.cah, &humout, fDefined, UNDEF));
     EXPECT_NEAR(p.expect, humout, p.near) << "hlevelhum C i=" << i << " compute=" << p.cah;
     EXPECT_EQ(miutil::ALL_DEFINED, fDefined);
 
     humout = 2*UNDEF;
     fDefined = miutil::SOME_DEFINED;
-    EXPECT_TRUE(miutil::fieldcalc::plevelhum(p.cp, 1, 1, &p.t, &p.humin, &humout, p.p, fDefined, UNDEF, "celsius"));
+    EXPECT_TRUE(miutil::fieldcalc::plevelhum(1, 1, &p.t, &p.humin, p.p, "celsius", p.cp, &humout, fDefined, UNDEF));
     EXPECT_NEAR(p.expect, humout, p.near) << "plevelhum C i=" << i << " compute=" << p.cp;
     EXPECT_EQ(miutil::ALL_DEFINED, fDefined);
 
@@ -126,17 +126,17 @@ TEST(FieldCalculationsTest, XLevelHum)
       continue;
 
     fDefined = miutil::ALL_DEFINED;
-    EXPECT_TRUE(miutil::fieldcalc::alevelhum(p.cah, 1, 1, &p.t, &p.humin, &p.p, &humout, fDefined, UNDEF, "kelvin"));
+    EXPECT_TRUE(miutil::fieldcalc::alevelhum(1, 1, &p.t, &p.humin, &p.p, "kelvin", p.cah, &humout, fDefined, UNDEF));
     EXPECT_NEAR(p.expect+T0, humout, p.near) << "alevelhum K i=" << i << " compute=" << p.cah;
     EXPECT_EQ(miutil::ALL_DEFINED, fDefined);
 
     fDefined = miutil::ALL_DEFINED;
-    EXPECT_TRUE(miutil::fieldcalc::hlevelhum(p.cah, 1, 1, &p.t, &p.humin, &p.p, &humout, alevel, blevel, fDefined, UNDEF, "kelvin"));
+    EXPECT_TRUE(miutil::fieldcalc::hlevelhum(1, 1, &p.t, &p.humin, &p.p, alevel, blevel, "kelvin", p.cah, &humout, fDefined, UNDEF));
     EXPECT_NEAR(p.expect+T0, humout, p.near) << "hlevelhum K i=" << i << " compute=" << p.cah;
     EXPECT_EQ(miutil::ALL_DEFINED, fDefined);
 
     fDefined = miutil::ALL_DEFINED;
-    EXPECT_TRUE(miutil::fieldcalc::plevelhum(p.cp, 1, 1, &p.t, &p.humin, &humout, p.p, fDefined, UNDEF, "kelvin"));
+    EXPECT_TRUE(miutil::fieldcalc::plevelhum(1, 1, &p.t, &p.humin, p.p, "kelvin", p.cp, &humout, fDefined, UNDEF));
     EXPECT_NEAR(p.expect+T0, humout, p.near) << "plevelhum K i=" << i << " compute=" << p.cp;
     EXPECT_EQ(miutil::ALL_DEFINED, fDefined);
   }
@@ -157,7 +157,7 @@ TEST(FieldCalculationsTest, ALevelTempPerformance)
       th[i] = 2*UNDEF;
     }
     for (int i=0; i<1; ++i)
-      EXPECT_TRUE(miutil::fieldcalc::aleveltemp(3, 1, N, tk, p, th, fDefined, UNDEF, "kelvin"));
+      EXPECT_TRUE(miutil::fieldcalc::aleveltemp(1, N, tk, p, "kelvin", 3, th, fDefined, UNDEF));
     for (int i=0; i<N; ++i) {
       const float ex = tk[i] / powf(p[i] * miutil::constants::p0inv, miutil::constants::kappa);
       EXPECT_FLOAT_EQ(ex, th[i]);

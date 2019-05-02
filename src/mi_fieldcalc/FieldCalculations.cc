@@ -325,7 +325,7 @@ void copy_field(float* fout, const float* fin, size_t fsize)
 // pressure level (PLEVEL) functions
 //---------------------------------------------------
 
-bool pleveltemp(int compute, int nx, int ny, const float* tinp, float* tout, float p, ValuesDefined& fDefined, float undef, const std::string& unit)
+bool pleveltemp(int nx, int ny, const float* tinp, float p, const std::string& unit, int compute, float* tout, ValuesDefined& fDefined, float undef)
 {
   if (p <= 0)
     return false;
@@ -366,7 +366,7 @@ bool pleveltemp(int compute, int nx, int ny, const float* tinp, float* tout, flo
   }
 }
 
-bool plevelthe(int compute, int nx, int ny, const float* t, const float* rh, float* the, float p, ValuesDefined& fDefined, float undef)
+bool plevelthe(int nx, int ny, const float* t, const float* rh, float p, int compute, float* the, ValuesDefined& fDefined, float undef)
 {
   //  Pressure levels:
   //    compute=1 : temp. (Kelvin)  og RH(%)     -> THE, ekvivalent pot.temp (Kelvin)
@@ -397,8 +397,8 @@ bool plevelthe(int compute, int nx, int ny, const float* t, const float* rh, flo
   return binaryFunctionFieldFieldUndef(func, nx, ny, t, rh, the, fDefined, undef);
 }
 
-bool plevelhum(int compute, int nx, int ny, const float* t, const float* huminp, float* humout, float p, ValuesDefined& fDefined, float undef,
-               const std::string& unit)
+bool plevelhum(int nx, int ny, const float* t, const float* huminp, float p,
+               const std::string& unit, int compute, float* humout, ValuesDefined& fDefined, float undef)
 {
   //  Pressure levels:
   //     compute=1  : temp. (Kelvin) og spes. fukt. -> rel. fuktighet (%)
@@ -463,7 +463,7 @@ bool plevelhum(int compute, int nx, int ny, const float* t, const float* huminp,
   return true;
 }
 
-bool pleveldz2tmean(int compute, int nx, int ny, const float* z1, const float* z2, float* tmean, float p1, float p2, ValuesDefined& fDefined, float undef)
+bool pleveldz2tmean(int nx, int ny, const float* z1, const float* z2, float p1, float p2, int compute, float* tmean, ValuesDefined& fDefined, float undef)
 {
   //  Pressure levels:
   //     compute=1 ; tykkelse -> middel temp. (grader Celsius)
@@ -502,8 +502,8 @@ bool pleveldz2tmean(int compute, int nx, int ny, const float* z1, const float* z
   return binaryFunctionFieldField(func, nx, ny, z1, z2, tmean, fDefined, undef);
 }
 
-bool plevelqvector(int compute, int nx, int ny, const float* z, const float* t, float* qcomp, const float* xmapr, const float* ymapr, const float* fcoriolis,
-                   float p, ValuesDefined& fDefined, float undef)
+bool plevelqvector(int nx, int ny, const float* z, const float* t, const float* xmapr, const float* ymapr, const float* fcoriolis,
+                   float p, int compute, float* qcomp, ValuesDefined& fDefined, float undef)
 {
   //  Q-vector in pressure levels
   //
@@ -555,8 +555,9 @@ bool plevelqvector(int compute, int nx, int ny, const float* z, const float* t, 
   std::unique_ptr<float[]> ug(new float[fsize]);
   std::unique_ptr<float[]> vg(new float[fsize]);
 
-  if (!plevelgwind_xcomp(nx, ny, z, ug.get(), xmapr, ymapr, fcoriolis, fDefined, undef) ||
-      !plevelgwind_ycomp(nx, ny, z, vg.get(), xmapr, ymapr, fcoriolis, fDefined, undef)) {
+  if (!plevelgwind_xcomp(nx, ny, z, xmapr, ymapr, fcoriolis, ug.get(), fDefined, undef) ||
+      !plevelgwind_ycomp(nx, ny, z, xmapr, ymapr, fcoriolis, vg.get(), fDefined, undef))
+  {
     return false;
   }
 
@@ -593,7 +594,7 @@ bool plevelqvector(int compute, int nx, int ny, const float* z, const float* t, 
   return true;
 }
 
-bool plevelducting(int compute, int nx, int ny, const float* t, const float* h, float* duct, float p, ValuesDefined& fDefined, float undef)
+bool plevelducting(int nx, int ny, const float* t, const float* h, float p, int compute, float* duct, ValuesDefined& fDefined, float undef)
 {
   //  Pressure level:
   //
@@ -634,7 +635,7 @@ bool plevelducting(int compute, int nx, int ny, const float* t, const float* h, 
   }
 }
 
-bool plevelgwind_xcomp(int nx, int ny, const float* z, float* ug, const float* /*xmapr*/, const float* ymapr, const float* fcoriolis, ValuesDefined& fDefined,
+bool plevelgwind_xcomp(int nx, int ny, const float* z, const float* /*xmapr*/, const float* ymapr, const float* fcoriolis, float* ug, ValuesDefined& fDefined,
                        float undef)
 {
   //  Geostophic wind in pressure level
@@ -670,7 +671,7 @@ bool plevelgwind_xcomp(int nx, int ny, const float* z, float* ug, const float* /
   return true;
 }
 
-bool plevelgwind_ycomp(int nx, int ny, const float* z, float* vg, const float* xmapr, const float* /*ymapr*/, const float* fcoriolis, ValuesDefined& fDefined,
+bool plevelgwind_ycomp(int nx, int ny, const float* z, const float* xmapr, const float* /*ymapr*/, const float* fcoriolis, float* vg, ValuesDefined& fDefined,
                        float undef)
 {
   //  Geostophic wind in pressure level
@@ -704,7 +705,7 @@ bool plevelgwind_ycomp(int nx, int ny, const float* z, float* vg, const float* x
   return true;
 }
 
-bool plevelgvort(int nx, int ny, const float* z, float* gvort, const float* xmapr, const float* ymapr, const float* fcoriolis, ValuesDefined& fDefined,
+bool plevelgvort(int nx, int ny, const float* z, const float* xmapr, const float* ymapr, const float* fcoriolis, float* gvort, ValuesDefined& fDefined,
                  float undef)
 {
   //  Geostophic vorticity in pressure level (centered differences)
@@ -741,8 +742,8 @@ bool plevelgvort(int nx, int ny, const float* z, float* gvort, const float* xmap
   return true;
 }
 
-bool kIndex(int compute, int nx, int ny, const float* t500, const float* t700, const float* rh700, const float* t850, const float* rh850, float* kfield,
-            float p500, float p700, float p850, ValuesDefined& fDefined, float undef)
+bool kIndex(int nx, int ny, const float* t500, const float* t700, const float* rh700, const float* t850, const float* rh850,
+            float p500, float p700, float p850, int compute, float* kfield, ValuesDefined& fDefined, float undef)
 {
   // K-index: (t+td)850 - (t-td)700 - (t)500
   //
@@ -812,7 +813,7 @@ bool kIndex(int compute, int nx, int ny, const float* t500, const float* t700, c
   return true;
 }
 
-bool ductingIndex(int compute, int nx, int ny, const float* t850, const float* rh850, float* duct, float p850, ValuesDefined& fDefined, float undef)
+bool ductingIndex(int nx, int ny, const float* t850, const float* rh850, float p850, int compute, float* duct, ValuesDefined& fDefined, float undef)
 {
   //  Pressure levels:
   //     compute=1 ; temp. (Kelvin) og rel. fukt. (%)  -> ducting
@@ -868,8 +869,7 @@ bool ductingIndex(int compute, int nx, int ny, const float* t850, const float* r
   return true;
 }
 
-bool showalterIndex(int compute, int nx, int ny, const float* t500, const float* t850, const float* rh850, float* sfield, float p500, float p850,
-                    ValuesDefined& fDefined, float undef)
+bool showalterIndex(int nx, int ny, const float* t500, const float* t850, const float* rh850, float p500, float p850, int compute, float* sfield, ValuesDefined& fDefined, float undef)
 {
   // Showalter index:  t500 - tx500,
   //                   tx500 er "t850" hevet toerr-adiabatisk
@@ -970,8 +970,7 @@ bool showalterIndex(int compute, int nx, int ny, const float* t500, const float*
   return true;
 }
 
-bool boydenIndex(int compute, int nx, int ny, const float* t700, const float* z700, const float* z1000, float* bfield, float p700, float p1000,
-                 ValuesDefined& fDefined, float undef)
+bool boydenIndex(int nx, int ny, const float* t700, const float* z700, const float* z1000, float p700, float p1000, int compute, float* bfield, ValuesDefined& fDefined, float undef)
 {
   // Boyden index:  (Z700-Z1000)/10 - Tc700 - 200.
   //
@@ -1014,7 +1013,7 @@ bool boydenIndex(int compute, int nx, int ny, const float* t700, const float* z7
   return true;
 }
 
-bool sweatIndex(int compute, int nx, int ny, const float* t850, const float* t500, const float* td850, const float* td500, const float* u850, const float* v850,
+bool sweatIndex(int nx, int ny, const float* t850, const float* t500, const float* td850, const float* td500, const float* u850, const float* v850,
                 const float* u500, const float* v500, float* sindex, ValuesDefined& fDefined, float undef)
 {
   // Severe Weather Threat Index
@@ -1044,8 +1043,8 @@ bool sweatIndex(int compute, int nx, int ny, const float* t850, const float* t50
 // hybrid model level (HLEVEL) functions
 //---------------------------------------------------
 
-bool hleveltemp(int compute, int nx, int ny, const float* tinp, const float* ps, float* tout, float alevel, float blevel, ValuesDefined& fDefined, float undef,
-                const std::string& unit)
+bool hleveltemp(int nx, int ny, const float* tinp, const float* ps, float alevel, float blevel,
+                const std::string& unit, int compute, float* tout, ValuesDefined& fDefined, float undef)
 {
   //  Modell-flater, sigma/eta(hybrid):
   //    sigma: alevel=ptop*(1.-sigma)   blevel=sigma  (p=pt+(ps[]-pt)*sigma)
@@ -1098,7 +1097,7 @@ bool hleveltemp(int compute, int nx, int ny, const float* tinp, const float* ps,
   return true;
 }
 
-bool hlevelthe(int compute, int nx, int ny, const float* t, const float* q, const float* ps, float* the, float alevel, float blevel, ValuesDefined& fDefined,
+bool hlevelthe(int nx, int ny, const float* t, const float* q, const float* ps, float alevel, float blevel, int compute, float* the, ValuesDefined& fDefined,
                float undef)
 {
   //  Modell-flater, sigma/eta(hybrid):
@@ -1143,8 +1142,8 @@ bool hlevelthe(int compute, int nx, int ny, const float* t, const float* q, cons
   return true;
 }
 
-bool hlevelhum(int compute, int nx, int ny, const float* t, const float* huminp, const float* ps, float* humout, float alevel, float blevel,
-               ValuesDefined& fDefined, float undef, const std::string& unit)
+bool hlevelhum(int nx, int ny, const float* t, const float* huminp, const float* ps, float alevel, float blevel, const std::string& unit, int compute, float* humout,
+               ValuesDefined& fDefined, float undef)
 {
   //  Modell-flater, sigma/eta(hybrid):
   //    sigma: alevel=ptop*(1.-sigma)   blevel=sigma  (p=pt+(ps[]-pt)*sigma)
@@ -1217,7 +1216,7 @@ bool hlevelhum(int compute, int nx, int ny, const float* t, const float* huminp,
   return true;
 }
 
-bool hlevelducting(int compute, int nx, int ny, const float* t, const float* h, const float* ps, float* duct, float alevel, float blevel,
+bool hlevelducting(int nx, int ny, const float* t, const float* h, const float* ps, float alevel, float blevel, int compute, float* duct,
                    ValuesDefined& fDefined, float undef)
 {
   //  Modell-flater, sigma/eta(hybrid):
@@ -1274,7 +1273,7 @@ bool hlevelducting(int compute, int nx, int ny, const float* t, const float* h, 
   return true;
 }
 
-bool hlevelpressure(int nx, int ny, const float* ps, float* p, float alevel, float blevel, ValuesDefined& fDefined, float undef)
+bool hlevelpressure(int nx, int ny, const float* ps, float alevel, float blevel, float* p, ValuesDefined& fDefined, float undef)
 {
   //  Model levels, eta(hybrid) or norlam_sigma:
   //    eta:   alevel,blevel    p = alevel + blevel * ps[]
@@ -1308,7 +1307,7 @@ bool hlevelpressure(int nx, int ny, const float* ps, float* p, float alevel, flo
 // atmospheric model level (ALEVEL) functions
 //---------------------------------------------------
 
-bool aleveltemp(int compute, int nx, int ny, const float* tinp, const float* p, float* tout, ValuesDefined& fDefined, float undef, const std::string& unit)
+bool aleveltemp(int nx, int ny, const float* tinp, const float* p, const std::string& unit, int compute, float* tout, ValuesDefined& fDefined, float undef)
 {
   //  Ukjente modell-flater, gitt trykk (p):
   //
@@ -1353,7 +1352,7 @@ bool aleveltemp(int compute, int nx, int ny, const float* tinp, const float* p, 
   return true;
 }
 
-bool alevelthe(int compute, int nx, int ny, const float* t, const float* q, const float* p, float* the, ValuesDefined& fDefined, float undef)
+bool alevelthe(int nx, int ny, const float* t, const float* q, const float* p, int compute, float* the, ValuesDefined& fDefined, float undef)
 {
   //  Ukjente modell-flater, gitt trykk (p):
   //
@@ -1392,8 +1391,8 @@ bool alevelthe(int compute, int nx, int ny, const float* t, const float* q, cons
   return true;
 }
 
-bool alevelhum(int compute, int nx, int ny, const float* t, const float* huminp, const float* p, float* humout, ValuesDefined& fDefined, float undef,
-               const std::string& unit)
+bool alevelhum(int nx, int ny, const float* t, const float* huminp, const float* p,
+               const std::string& unit, int compute, float* humout, ValuesDefined& fDefined, float undef)
 {
   //  Ukjente modell-flater, gitt trykk (p):
   //
@@ -1458,7 +1457,7 @@ bool alevelhum(int compute, int nx, int ny, const float* t, const float* huminp,
   return true;
 }
 
-bool alevelducting(int compute, int nx, int ny, const float* t, const float* h, const float* p, float* duct, ValuesDefined& fDefined, float undef)
+bool alevelducting(int nx, int ny, const float* t, const float* h, const float* p, int compute, float* duct, ValuesDefined& fDefined, float undef)
 {
   //  Unknown atmospheric level, with input pressure field:
   //
@@ -1509,7 +1508,7 @@ bool alevelducting(int compute, int nx, int ny, const float* t, const float* h, 
 // isentropic level (ILEVEL) function
 //---------------------------------------------------
 
-bool ilevelgwind(int nx, int ny, const float* mpot, float* ug, float* vg, const float* xmapr, const float* ymapr, const float* fcoriolis,
+bool ilevelgwind(int nx, int ny, const float* mpot, const float* xmapr, const float* ymapr, const float* fcoriolis, float* ug, float* vg,
                  ValuesDefined& fDefined, float undef)
 {
   //  Geostophic wind in isentropic level
@@ -1553,7 +1552,7 @@ bool ilevelgwind(int nx, int ny, const float* mpot, float* ug, float* vg, const 
 // ocean depth level (OZLEVEL) functions
 //---------------------------------------------------
 
-bool seaSoundSpeed(int compute, int nx, int ny, const float* t, const float* s, float* soundspeed, float z_, ValuesDefined& fDefined, float undef)
+bool seaSoundSpeed(int nx, int ny, const float* t, const float* s, float z_, int compute, float* soundspeed, ValuesDefined& fDefined, float undef)
 {
   //-------------------------------------------------------------
   //       D. Ross: "Revised simplified formulae
@@ -1606,7 +1605,7 @@ bool seaSoundSpeed(int compute, int nx, int ny, const float* t, const float* s, 
 // level (vertical coordinate) independant functions
 //---------------------------------------------------
 
-bool cvtemp(int compute, int nx, int ny, const float* tinp, float* tout, ValuesDefined& fDefined, float undef)
+bool cvtemp(int nx, int ny, const float* tinp, int compute, float* tout, ValuesDefined& fDefined, float undef)
 {
   // compute=1 : Temperature from degrees Kelvin to degrees Celsius
   // compute=2 : Temperature from degrees Celsius to degrees Kelvin
@@ -1736,7 +1735,7 @@ bool abshum(int nx, int ny, const float* t, const float* rhum, float* abshumout,
   return true;
 }
 
-bool cvhum(int compute, int nx, int ny, const float* t, const float* huminp, float* humout, ValuesDefined& fDefined, float undef, const std::string& unit)
+bool cvhum(int nx, int ny, const float* t, const float* huminp, const std::string& unit, int compute, float* humout, ValuesDefined& fDefined, float undef)
 {
   //     compute=1 : temp. (Kelvin)  og rel. fukt.  -> duggpunkt, Td (Kelvin)
   //     compute=2 : temp. (Kelvin)  og rel. fukt.  -> duggpunkt, Td (Celsius)
@@ -1838,7 +1837,7 @@ bool vectorabs(int nx, int ny, const float* u, const float* v, float* ff, Values
   return true;
 }
 
-bool relvort(int nx, int ny, const float* u, const float* v, float* rvort, const float* xmapr, const float* ymapr, ValuesDefined& fDefined, float undef)
+bool relvort(int nx, int ny, const float* u, const float* v, const float* xmapr, const float* ymapr, float* rvort, ValuesDefined& fDefined, float undef)
 {
   //  Relative vorticity from u and v (centered differences)
   //
@@ -1870,7 +1869,7 @@ bool relvort(int nx, int ny, const float* u, const float* v, float* rvort, const
   return true;
 }
 
-bool absvort(int nx, int ny, const float* u, const float* v, float* avort, const float* xmapr, const float* ymapr, const float* fcoriolis,
+bool absvort(int nx, int ny, const float* u, const float* v, const float* xmapr, const float* ymapr, const float* fcoriolis, float* avort,
              ValuesDefined& fDefined, float undef)
 {
   //  Absolute vorticity from u and v (centered differences)
@@ -1905,7 +1904,7 @@ bool absvort(int nx, int ny, const float* u, const float* v, float* avort, const
   return true;
 }
 
-bool divergence(int nx, int ny, const float* u, const float* v, float* diverg, const float* xmapr, const float* ymapr, ValuesDefined& fDefined, float undef)
+bool divergence(int nx, int ny, const float* u, const float* v, const float* xmapr, const float* ymapr, float* diverg, ValuesDefined& fDefined, float undef)
 {
   //  Divergence from u and v (centered differences)
   //
@@ -1937,7 +1936,7 @@ bool divergence(int nx, int ny, const float* u, const float* v, float* diverg, c
   return true;
 }
 
-bool advection(int nx, int ny, const float* f, const float* u, const float* v, float* advec, const float* xmapr, const float* ymapr, float hours,
+bool advection(int nx, int ny, const float* f, const float* u, const float* v, const float* xmapr, const float* ymapr, float hours, float* advec,
                ValuesDefined& fDefined, float undef)
 {
   // compute advection of a scalar field f (e.g. temperature):
@@ -1980,7 +1979,7 @@ bool advection(int nx, int ny, const float* f, const float* u, const float* v, f
   return true;
 }
 
-bool gradient(int compute, int nx, int ny, const float* field, float* fgrad, const float* xmapr, const float* ymapr, ValuesDefined& fDefined, float undef)
+bool gradient(int nx, int ny, const float* field, const float* xmapr, const float* ymapr, int compute, float* fgrad, ValuesDefined& fDefined, float undef)
 {
   //  Gradienter beregnet med sentrerte differanser, kartfaktor
   //  og gridavstand i meter.
@@ -2176,7 +2175,7 @@ bool shapiro2_filter(int nx, int ny, float* field, float* fsmooth, ValuesDefined
   return true;
 }
 
-bool windCooling(int compute, int nx, int ny, const float* t, const float* u, const float* v, float* dtcool, ValuesDefined& fDefined, float undef)
+bool windCooling(int nx, int ny, const float* t, const float* u, const float* v, int compute, float* dtcool, ValuesDefined& fDefined, float undef)
 {
   // Compute wind cooling (the difference, not the sensed temperature)
   //
@@ -2226,8 +2225,8 @@ bool windCooling(int compute, int nx, int ny, const float* t, const float* u, co
   return true;
 }
 
-bool underCooledRain(int nx, int ny, const float* precip, const float* snow, const float* tk, float* undercooled, float precipMin, float snowRateMax,
-                     float tcMax, ValuesDefined& fDefined, float undef)
+bool underCooledRain(int nx, int ny, const float* precip, const float* snow, const float* tk, float precipMin, float snowRateMax,
+                     float tcMax, float* undercooled, ValuesDefined& fDefined, float undef)
 {
   // compute possibility/danger for undercooled rain.....
   //
@@ -2261,7 +2260,7 @@ bool underCooledRain(int nx, int ny, const float* precip, const float* snow, con
   return true;
 }
 
-bool thermalFrontParameter(int nx, int ny, const float* tx, float* tfp, const float* xmapr, const float* ymapr, ValuesDefined& fDefined, float undef)
+bool thermalFrontParameter(int nx, int ny, const float* tx, const float* xmapr, const float* ymapr, float* tfp, ValuesDefined& fDefined, float undef)
 {
   // Thermal Front Parameter
   // TFP = -del(abs(del(T)) . del(t)/abs(del(T))
@@ -2274,10 +2273,9 @@ bool thermalFrontParameter(int nx, int ny, const float* tx, float* tfp, const fl
 
   const int fsize = nx * ny;
 
-  float* absdelt = new float[fsize];
+  std::unique_ptr<float[]> absdelt(new float[fsize]);
 
-  if (!gradient(3, nx, ny, tx, absdelt, xmapr, ymapr, fDefined, undef)) {
-    delete[] absdelt;
+  if (!gradient(nx, ny, tx, xmapr, ymapr, 3, absdelt.get(), fDefined, undef)) {
     return false;
   }
 
@@ -2300,8 +2298,6 @@ bool thermalFrontParameter(int nx, int ny, const float* tx, float* tfp, const fl
     }
   }
   fDefined = miutil::checkDefined(n_undefined, fsize - 2 * nx);
-
-  delete[] absdelt;
 
   // fill in edge values not computed (or badly computed) above
   fillEdges(nx, ny, tfp);
@@ -2349,7 +2345,7 @@ bool pressure2FlightLevel(int nx, int ny, const float* pressure, float* flightle
   return true;
 }
 
-bool momentumXcoordinate(int nx, int ny, const float* v, float* mxy, const float* xmapr, const float* fcoriolis, float fcoriolisMin, ValuesDefined& fDefined,
+bool momentumXcoordinate(int nx, int ny, const float* v, const float* xmapr, const float* fcoriolis, float fcoriolisMin, float* mxy, ValuesDefined& fDefined,
                          float undef)
 {
   // Momentum coordinates, X component
@@ -2386,7 +2382,7 @@ bool momentumXcoordinate(int nx, int ny, const float* v, float* mxy, const float
   return true;
 }
 
-bool momentumYcoordinate(int nx, int ny, const float* u, float* nxy, const float* ymapr, const float* fcoriolis, float fcoriolisMin, ValuesDefined& fDefined,
+bool momentumYcoordinate(int nx, int ny, const float* u, const float* ymapr, const float* fcoriolis, float fcoriolisMin, float* nxy, ValuesDefined& fDefined,
                          float undef)
 {
   // Momentum coordinates, Y component
@@ -2422,7 +2418,7 @@ bool momentumYcoordinate(int nx, int ny, const float* u, float* nxy, const float
   return true;
 }
 
-bool jacobian(int nx, int ny, const float* field1, const float* field2, float* fjacobian, const float* xmapr, const float* ymapr, ValuesDefined& fDefined,
+bool jacobian(int nx, int ny, const float* field1, const float* field2, const float* xmapr, const float* ymapr, float* fjacobian, ValuesDefined& fDefined,
               float undef)
 {
   //  Beregner den jacobiske av f1 og f2:

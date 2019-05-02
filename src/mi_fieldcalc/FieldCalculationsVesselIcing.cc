@@ -180,8 +180,8 @@ bool vesselIcingMertins(int nx, int ny, const float* airtemp, const float* seate
 }
 
 bool vesselIcingModStall(int nx, int ny, const float* sal, const float* wave, const float* x_wind, const float* y_wind, const float* airtemp, const float* rh,
-                         const float* sst, const float* p, const float* Pw, const float* aice, const float* depth, float* icing, const float vs,
-                         const float alpha, const float zmin, const float zmax, ValuesDefined& fDefined, float undef)
+                         const float* sst, const float* p, const float* Pw, const float* aice, const float* depth, const float vs,
+                         const float alpha, const float zmin, const float zmax, float* icing, ValuesDefined& fDefined, float undef)
 {
 
   // Modified Stallabrass (described in Henry (1995), Samuelsen et.al. (2015))
@@ -675,8 +675,8 @@ V vesselIcingMincog(const V sal, const V wave, const V x_wind, const V y_wind, c
 }
 
 bool vesselIcingMincog(int nx, int ny, const float* sal, const float* wave, const float* x_wind, const float* y_wind, const float* airtemp, const float* rh,
-                       const float* sst, const float* p, const float* Pw, const float* aice, const float* depth, float* icing, const float vs,
-                       const float alpha, const float zmin, const float zmax, const int alt, ValuesDefined& fDefined, float undef)
+                       const float* sst, const float* p, const float* Pw, const float* aice, const float* depth, const float vs,
+                       const float alpha, const float zmin, const float zmax, const int alt, float* icing, ValuesDefined& fDefined, float undef)
 {
   // MINCOG described in Samuelsen et.al. (2017) with two options.
   // alt == 1: MINCOG org

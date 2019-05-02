@@ -36,7 +36,7 @@ class TestFieldCalc(unittest.TestCase):
     def test_abshum(self):
         tk = np.array([[293.16]])
         rh = np.array([[0.8]])
-        ah = fc.abshum(tk, rh)
+        ah = fc.abshum(tk, rh, -1)
         self.assertIsNotNone(ah)
         self.assertAlmostEqual(13.83, ah[0,0], delta=0.02)
 

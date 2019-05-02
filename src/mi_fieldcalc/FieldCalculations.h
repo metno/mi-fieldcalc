@@ -99,133 +99,140 @@ inline bool is_defined(bool allDefined, float in1, float in2, float in3, float i
 
 void copy_field(float* fout, const float* fin, size_t fsize);
 
+// parameter order:
+// - nx, ny
+// - const float* input fields
+// - other parameters, "compute" last
+// - float* output field
+// - fDefined, undef
+
 //---------------------------------------------------
 // pressure level (PLEVEL) functions
 //---------------------------------------------------
 
-bool pleveltemp(int compute, int nx, int ny, const float* tinp, float* tout, float p, ValuesDefined& fDefined, float undef, const std::string& unit);
+bool pleveltemp(int nx, int ny, const float* tinp, float p, const std::string& unit, int compute, float* tout, ValuesDefined& fDefined, float undef);
 
-bool plevelthe(int compute, int nx, int ny, const float* t, const float* rh, float* the, float p, ValuesDefined& fDefined, float undef);
+bool plevelthe(int nx, int ny, const float* t, const float* rh, float p, int compute, float* the, ValuesDefined& fDefined, float undef);
 
-bool plevelhum(int compute, int nx, int ny, const float* t, const float* huminp, float* humout, float p, ValuesDefined& fDefined, float undef,
-               const std::string& unit);
+bool plevelhum(int nx, int ny, const float* t, const float* huminp, float p,
+               const std::string& unit, int compute, float* humout, ValuesDefined& fDefined, float undef);
 
-bool pleveldz2tmean(int compute, int nx, int ny, const float* z1, const float* z2, float* tmean, float p1, float p2, ValuesDefined& fDefined, float undef);
+bool pleveldz2tmean(int nx, int ny, const float* z1, const float* z2, float p1, float p2, int compute, float* tmean, ValuesDefined& fDefined, float undef);
 
-bool plevelqvector(int compute, int nx, int ny, const float* z, const float* t, float* qcomp, const float* xmapr, const float* ymapr, const float* fcoriolis,
-                   float p, ValuesDefined& fDefined, float undef);
+bool plevelqvector(int nx, int ny, const float* z, const float* t, const float* xmapr, const float* ymapr, const float* fcoriolis,
+                   float p, int compute, float* qcomp, ValuesDefined& fDefined, float undef);
 
-bool plevelducting(int compute, int nx, int ny, const float* t, const float* h, float* duct, float p, ValuesDefined& fDefined, float undef);
+bool plevelducting(int nx, int ny, const float* t, const float* h, float p, int compute, float* duct, ValuesDefined& fDefined, float undef);
 
-bool plevelgwind_xcomp(int nx, int ny, const float* z, float* ug, const float* xmapr, const float* ymapr, const float* fcoriolis, ValuesDefined& fDefined,
+bool plevelgwind_xcomp(int nx, int ny, const float* z, const float* xmapr, const float* ymapr, const float* fcoriolis, float* ug, ValuesDefined& fDefined,
                        float undef);
 
-bool plevelgwind_ycomp(int nx, int ny, const float* z, float* vg, const float* xmapr, const float* ymapr, const float* fcoriolis, ValuesDefined& fDefined,
+bool plevelgwind_ycomp(int nx, int ny, const float* z, const float* xmapr, const float* ymapr, const float* fcoriolis, float* vg, ValuesDefined& fDefined,
                        float undef);
 
-bool plevelgvort(int nx, int ny, const float* z, float* gvort, const float* xmapr, const float* ymapr, const float* fcoriolis, ValuesDefined& fDefined,
+bool plevelgvort(int nx, int ny, const float* z, const float* xmapr, const float* ymapr, const float* fcoriolis, float* gvort, ValuesDefined& fDefined,
                  float undef);
 
-bool kIndex(int compute, int nx, int ny, const float* t500, const float* t700, const float* rh700, const float* t850, const float* rh850, float* kfield,
-            float p500, float p700, float p850, ValuesDefined& fDefined, float undef);
+bool kIndex(int nx, int ny, const float* t500, const float* t700, const float* rh700, const float* t850, const float* rh850,
+            float p500, float p700, float p850, int compute, float* kfield, ValuesDefined& fDefined, float undef);
 
-bool ductingIndex(int compute, int nx, int ny, const float* t850, const float* rh850, float* duct, float p850, ValuesDefined& fDefined, float undef);
+bool ductingIndex(int nx, int ny, const float* t850, const float* rh850, float p850, int compute, float* duct, ValuesDefined& fDefined, float undef);
 
-bool showalterIndex(int compute, int nx, int ny, const float* t500, const float* t850, const float* rh850, float* sfield, float p500, float p850,
-                    ValuesDefined& fDefined, float undef);
+bool showalterIndex(int nx, int ny, const float* t500, const float* t850, const float* rh850, float p500, float p850,
+                    int compute, float* sfield, ValuesDefined& fDefined, float undef);
 
-bool boydenIndex(int compute, int nx, int ny, const float* t700, const float* z700, const float* z1000, float* bfield, float p700, float p1000,
-                 ValuesDefined& fDefined, float undef);
+bool boydenIndex(int nx, int ny, const float* t700, const float* z700, const float* z1000, float p700, float p1000,
+                 int compute, float* bfield, ValuesDefined& fDefined, float undef);
 
-bool sweatIndex(int compute, int nx, int ny, const float* t850, const float* t500, const float* td850, const float* td500, const float* u850, const float* v850,
+bool sweatIndex(int nx, int ny, const float* t850, const float* t500, const float* td850, const float* td500, const float* u850, const float* v850,
                 const float* u500, const float* v500, float* sindex, ValuesDefined& fDefined, float undef);
 
 //---------------------------------------------------
 // hybrid model level (HLEVEL) functions
 //---------------------------------------------------
 
-bool hleveltemp(int compute, int nx, int ny, const float* tinp, const float* ps, float* tout, float alevel, float blevel, ValuesDefined& fDefined, float undef,
-                const std::string& unit);
+bool hleveltemp(int nx, int ny, const float* tinp, const float* ps, float alevel, float blevel,
+                const std::string& unit, int compute, float* tout, ValuesDefined& fDefined, float undef);
 
-bool hlevelthe(int compute, int nx, int ny, const float* t, const float* q, const float* ps, float* the, float alevel, float blevel, ValuesDefined& fDefined,
+bool hlevelthe(int nx, int ny, const float* t, const float* q, const float* ps, float alevel, float blevel, int compute, float* the, ValuesDefined& fDefined,
                float undef);
 
-bool hlevelhum(int compute, int nx, int ny, const float* t, const float* huminp, const float* ps, float* humout, float alevel, float blevel,
-               ValuesDefined& fDefined, float undef, const std::string& unit);
+bool hlevelhum(int nx, int ny, const float* t, const float* huminp, const float* ps, float alevel, float blevel, const std::string& unit, int compute, float* humout,
+               ValuesDefined& fDefined, float undef);
 
-bool hlevelducting(int compute, int nx, int ny, const float* t, const float* h, const float* ps, float* duct, float alevel, float blevel,
+bool hlevelducting(int nx, int ny, const float* t, const float* h, const float* ps, float alevel, float blevel, int compute, float* duct,
                    ValuesDefined& fDefined, float undef);
 
-bool hlevelpressure(int nx, int ny, const float* ps, float* p, float alevel, float blevel, ValuesDefined& fDefined, float undef);
+bool hlevelpressure(int nx, int ny, const float* ps, float alevel, float blevel, float* p, ValuesDefined& fDefined, float undef);
 
 //---------------------------------------------------
 // atmospheric model level (ALEVEL) functions
 //---------------------------------------------------
 
-bool aleveltemp(int compute, int nx, int ny, const float* tinp, const float* p, float* tout, ValuesDefined& fDefined, float undef, const std::string& unit);
+bool aleveltemp(int nx, int ny, const float* tinp, const float* p, const std::string& unit, int compute, float* tout, ValuesDefined& fDefined, float undef);
 
-bool alevelthe(int compute, int nx, int ny, const float* t, const float* q, const float* p, float* the, ValuesDefined& fDefined, float undef);
+bool alevelthe(int nx, int ny, const float* t, const float* q, const float* p, int compute, float* the, ValuesDefined& fDefined, float undef);
 
-bool alevelhum(int compute, int nx, int ny, const float* t, const float* huminp, const float* p, float* humout, ValuesDefined& fDefined, float undef,
-               const std::string& unit);
+bool alevelhum(int nx, int ny, const float* t, const float* huminp, const float* p,
+               const std::string& unit, int compute, float* humout, ValuesDefined& fDefined, float undef);
 
-bool alevelducting(int compute, int nx, int ny, const float* t, const float* h, const float* p, float* duct, ValuesDefined& fDefined, float undef);
+bool alevelducting(int nx, int ny, const float* t, const float* h, const float* p, int compute, float* duct, ValuesDefined& fDefined, float undef);
 
 //---------------------------------------------------
 // isentropic level (ILEVEL) function
 //---------------------------------------------------
 
-bool ilevelgwind(int nx, int ny, const float* mpot, float* ug, float* vg, const float* xmapr, const float* ymapr, const float* fcoriolis,
+bool ilevelgwind(int nx, int ny, const float* mpot, const float* xmapr, const float* ymapr, const float* fcoriolis, float* ug, float* vg,
                  ValuesDefined& fDefined, float undef);
 
 //---------------------------------------------------
 // ocean depth level (OZLEVEL) functions
 //---------------------------------------------------
 
-bool seaSoundSpeed(int compute, int nx, int ny, const float* t, const float* s, float* soundspeed, float z, ValuesDefined& fDefined, float undef);
+bool seaSoundSpeed(int nx, int ny, const float* t, const float* s, float z, int compute, float* soundspeed, ValuesDefined& fDefined, float undef);
 
 //---------------------------------------------------
 // level (pressure) independant functions
 //---------------------------------------------------
 
-bool cvtemp(int compute, int nx, int ny, const float* tinp, float* tout, ValuesDefined& fDefined, float undef);
+bool cvtemp(int nx, int ny, const float* tinp, int compute, float* tout, ValuesDefined& fDefined, float undef);
 
-bool cvhum(int compute, int nx, int ny, const float* t, const float* huminp, float* humout, ValuesDefined& fDefined, float undef, const std::string& unit);
+bool cvhum(int nx, int ny, const float* t, const float* huminp, const std::string& unit, int compute, float* humout, ValuesDefined& fDefined, float undef);
 
 bool abshum(int nx, int ny, const float* t, const float* rhum, float* abshumout, ValuesDefined& fDefined, float undef);
 
 bool vectorabs(int nx, int ny, const float* u, const float* v, float* ff, ValuesDefined& fDefined, float undef);
 
-bool relvort(int nx, int ny, const float* u, const float* v, float* rvort, const float* xmapr, const float* ymapr, ValuesDefined& fDefined, float undef);
+bool relvort(int nx, int ny, const float* u, const float* v, const float* xmapr, const float* ymapr, float* rvort, ValuesDefined& fDefined, float undef);
 
-bool absvort(int nx, int ny, const float* u, const float* v, float* avort, const float* xmapr, const float* ymapr, const float* fcoriolis,
+bool absvort(int nx, int ny, const float* u, const float* v, const float* xmapr, const float* ymapr, const float* fcoriolis, float* avort,
              ValuesDefined& fDefined, float undef);
 
-bool divergence(int nx, int ny, const float* u, const float* v, float* diverg, const float* xmapr, const float* ymapr, ValuesDefined& fDefined, float undef);
+bool divergence(int nx, int ny, const float* u, const float* v, const float* xmapr, const float* ymapr, float* diverg, ValuesDefined& fDefined, float undef);
 
-bool advection(int nx, int ny, const float* f, const float* u, const float* v, float* advec, const float* xmapr, const float* ymapr, float hours,
+bool advection(int nx, int ny, const float* f, const float* u, const float* v, const float* xmapr, const float* ymapr, float hours, float* advec,
                ValuesDefined& fDefined, float undef);
 
-bool gradient(int compute, int nx, int ny, const float* field, float* fgrad, const float* xmapr, const float* ymapr, ValuesDefined& fDefined, float undef);
+bool gradient(int nx, int ny, const float* field, const float* xmapr, const float* ymapr, int compute, float* fgrad, ValuesDefined& fDefined, float undef);
 
 bool shapiro2_filter(int nx, int ny, float* field, float* fsmooth, ValuesDefined& fDefined, float undef);
 
-bool windCooling(int compute, int nx, int ny, const float* t, const float* u, const float* v, float* dtcool, ValuesDefined& fDefined, float undef);
+bool windCooling(int nx, int ny, const float* t, const float* u, const float* v, int compute, float* dtcool, ValuesDefined& fDefined, float undef);
 
-bool underCooledRain(int nx, int ny, const float* precip, const float* snow, const float* tk, float* undercooled, float precipMin, float snowRateMax,
-                     float tcMax, ValuesDefined& fDefined, float undef);
+bool underCooledRain(int nx, int ny, const float* precip, const float* snow, const float* tk, float precipMin, float snowRateMax,
+                     float tcMax, float* undercooled, ValuesDefined& fDefined, float undef);
 
-bool thermalFrontParameter(int nx, int ny, const float* t, float* tfp, const float* xmapr, const float* ymapr, ValuesDefined& fDefined, float undef);
+bool thermalFrontParameter(int nx, int ny, const float* t, const float* xmapr, const float* ymapr, float* tfp, ValuesDefined& fDefined, float undef);
 
 bool pressure2FlightLevel(int nx, int ny, const float* pressure, float* flightlevel, ValuesDefined& fDefined, float undef);
 
-bool momentumXcoordinate(int nx, int ny, const float* v, float* mxy, const float* xmapr, const float* fcoriolis, float fcoriolisMin, ValuesDefined& fDefined,
+bool momentumXcoordinate(int nx, int ny, const float* v, const float* xmapr, const float* fcoriolis, float fcoriolisMin, float* mxy, ValuesDefined& fDefined,
                          float undef);
 
-bool momentumYcoordinate(int nx, int ny, const float* u, float* nxy, const float* ymapr, const float* fcoriolis, float fcoriolisMin, ValuesDefined& fDefined,
+bool momentumYcoordinate(int nx, int ny, const float* u, const float* ymapr, const float* fcoriolis, float fcoriolisMin, float* nxy, ValuesDefined& fDefined,
                          float undef);
 
-bool jacobian(int nx, int ny, const float* field1, const float* field2, float* fjacobian, const float* xmapr, const float* ymapr, ValuesDefined& fDefined,
+bool jacobian(int nx, int ny, const float* field1, const float* field2, const float* xmapr, const float* ymapr, float* fjacobian, ValuesDefined& fDefined,
               float undef);
 
 bool vesselIcingOverland(int nx, int ny, const float* airtemp, const float* seatemp, const float* u, const float* v, const float* sal, const float* aice,
@@ -235,12 +242,12 @@ bool vesselIcingMertins(int nx, int ny, const float* airtemp, const float* seate
                         float* icing, ValuesDefined& fDefined, float undef);
 
 bool vesselIcingModStall(int nx, int ny, const float* sal, const float* wave, const float* x_wind, const float* y_wind, const float* airtemp, const float* rh,
-                         const float* sst, const float* p, const float* Pw, const float* aice, const float* depth, float* icing, const float vs,
-                         const float alpha, const float zmin, const float zmax, ValuesDefined& fDefined, float undef);
+                         const float* sst, const float* p, const float* Pw, const float* aice, const float* depth, const float vs,
+                         const float alpha, const float zmin, const float zmax, float* icing, ValuesDefined& fDefined, float undef);
 
 bool vesselIcingMincog(int nx, int ny, const float* sal, const float* wave, const float* x_wind, const float* y_wind, const float* airtemp, const float* rh,
-                       const float* sst, const float* p, const float* Pw, const float* aice, const float* depth, float* icing, const float vs,
-                       const float alpha, const float zmin, const float zmax, const int alt, ValuesDefined& fDefined, float undef);
+                       const float* sst, const float* p, const float* Pw, const float* aice, const float* depth, const float vs,
+                       const float alpha, const float zmin, const float zmax, const int alt, float* icing, ValuesDefined& fDefined, float undef);
 
 bool values2classes(int nx, int ny, const float* fvalue, float* fclass, const std::vector<float>& values, ValuesDefined& fDefined, float undef);
 
