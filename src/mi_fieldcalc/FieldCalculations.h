@@ -240,7 +240,7 @@ bool vesselIcingModStall(int nx, int ny, const float* sal, const float* wave, co
 
 bool vesselIcingMincog(int nx, int ny, const float* sal, const float* wave, const float* x_wind, const float* y_wind, const float* airtemp, const float* rh,
                        const float* sst, const float* p, const float* Pw, const float* aice, const float* depth, float* icing, const float vs,
-                       const float alpha, const float zmin, const float zmax, const float alt, ValuesDefined& fDefined, float undef);
+                       const float alpha, const float zmin, const float zmax, const int alt, ValuesDefined& fDefined, float undef);
 
 bool values2classes(int nx, int ny, const float* fvalue, float* fclass, const std::vector<float>& values, ValuesDefined& fDefined, float undef);
 
