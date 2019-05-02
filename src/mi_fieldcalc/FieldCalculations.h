@@ -276,8 +276,6 @@ bool constantOPERfield(int compute, int nx, int ny, float value, const float* fi
 
 bool sumFields(int nx, int ny, const std::vector<float*>& fields, float* fres, ValuesDefined& fDefined, float undef);
 
-void fillEdges(int nx, int ny, float* field);
-
 bool meanValue(int nx, int ny, const std::vector<float*>& fields, const std::vector<ValuesDefined>& fDefinedIn, float* fres, ValuesDefined& fDefinedOut,
                float undef);
 

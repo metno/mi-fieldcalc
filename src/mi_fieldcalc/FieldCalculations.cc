@@ -56,6 +56,23 @@ inline T pow4(T x)
   return pow2(pow2(x));
 }
 
+void fillEdges(int nx, int ny, float* field)
+{
+  // Fill in edge values not computed or badly computed.
+  // Note that in some (d/dx,d/dy) cases even correct computed edge values will be changed,
+  // possibly not so good when current computation is used in following computations
+
+  for (int j = 1, i1 = nx, i2 = nx * 2 - 1; j < ny - 1; j++, i1 += nx, i2 += nx) {
+    field[i1] = field[i1 + 1];
+    field[i2] = field[i2 - 1];
+  }
+
+  for (int i1 = 0, i2 = nx * ny - nx; i1 < nx; i1++, i2++) {
+    field[i1] = field[i1 + nx];
+    field[i2] = field[i2 - nx];
+  }
+}
+
 bool fillUndef(int nx, int ny, float* fres, miutil::ValuesDefined& fDefined, float undef)
 {
   const size_t fsize = nx * ny;
@@ -2675,23 +2692,6 @@ bool sumFields(int nx, int ny, const std::vector<float*>& fields, float* fres, V
   }
   fDefined = miutil::checkDefined(n_undefined, fsize);
   return true;
-}
-
-void fillEdges(int nx, int ny, float* field)
-{
-  // Fill in edge values not computed or badly computed.
-  // Note that in some (d/dx,d/dy) cases even correct computed edge values will be changed,
-  // possibly not so good when current computation is used in following computations
-
-  for (int j = 1, i1 = nx, i2 = nx * 2 - 1; j < ny - 1; j++, i1 += nx, i2 += nx) {
-    field[i1] = field[i1 + 1];
-    field[i2] = field[i2 - 1];
-  }
-
-  for (int i1 = 0, i2 = nx * ny - nx; i1 < nx; i1++, i2++) {
-    field[i1] = field[i1 + nx];
-    field[i2] = field[i2 - nx];
-  }
 }
 
 bool meanValue(int nx, int ny, const std::vector<float*>& fields, const std::vector<ValuesDefined>& fDefinedIn, float* fres, ValuesDefined& fDefinedOut,
