@@ -1,0 +1,56 @@
+Source: mi-fieldcalc
+Priority: optional
+Maintainer: MET Norway <diana@met.no>
+Build-Depends:  debhelper (>= 9),
+ dh-python,
+ cmake,
+ libgtest-dev,
+ python3-dev,
+ python3-numpy,
+ pybind11-dev
+Standards-Version: 3.9.6
+Section: libs
+
+Package: libmi-fieldcalc-dev
+Section: libdevel
+Architecture: amd64
+Depends: libmi-fieldcalc0 (= ${binary:Version}),
+ ${shlibs:Depends},
+ ${misc:Depends}
+Description: MET Norway meteorological field calculations library
+ A library for meteorological field calculations.
+ .
+ This package contains the development files.
+
+Package: libmi-fieldcalc0
+Section: libs
+Architecture: amd64
+Depends: ${shlibs:Depends}
+Description: MET Norway meteorological field calculations library
+ A library for meteorological field calculations.
+ .
+ This package contains the shared library.
+
+Package: libmi-fieldcalc0-dbg
+Section: debug
+Priority: extra
+Architecture: amd64
+Depends: libmi-fieldcalc0 (= ${binary:Version})
+Description: MET Norway meteorological field calculations library
+ A library for meteorological field calculations.
+ .
+ This package contains the shared library debug symbols.
+
+Package: python3-mi-fieldcalc
+Section: python
+Priority: extra
+Architecture: amd64
+Depends: python3,
+ ${python:Depends},
+ ${shlibs:Depends},
+ ${misc:Depends},
+ libmi-fieldcalc0 (= ${binary:Version})
+Description: MET Norway meteorological field calculations library
+ A library for meteorological field calculations.
+ .
+ This package contains the python binding.

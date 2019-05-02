@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+DH_COMMAND = dh
+
+V_HEADER_FILE = src/mi_fieldcalc/mi_fieldcalc_version.h
+
+PY_VERSION = $(shell python3 --version | sed -e 's,Python \([0-9]\+\.[0-9]\+\).*,\1,')
+
+%:
+	$(DH_COMMAND) $@ --parallel
+
+.PHONY: override_dh_auto_configure version-check
+override_dh_auto_configure: version-check
+	dh_auto_configure -- \
+	  -DPYBIND11_PYTHON_VERSION=$(PY_VERSION) -DPython_ADDITIONAL_VERSIONS=$(PY_VERSION)
+
+version-check:
+	@ V_MAJOR=`grep '^#define .*_VERSION_MAJOR ' "${V_HEADER_FILE}" | cut -d' ' -f3` ; \
+	V_MINOR=`grep '^#define .*_VERSION_MINOR ' "${V_HEADER_FILE}" | cut -d' ' -f3` ; \
+	V_PATCH=`grep '^#define .*_VERSION_PATCH ' "${V_HEADER_FILE}" | cut -d' ' -f3` ; \
+	head -n1 debian/changelog | grep -q "$${V_MAJOR}\\.$${V_MINOR}\\.$${V_PATCH}-" || \
+	{ echo "version mismatch ${V_HEADER_FILE} vs debian/changelog" ; false ; }
+
+.PHONY: override_dh_strip
+override_dh_strip:
+	dh_strip --dbg-package=libmi-fieldcalc0-dbg
+
+.PHONY: override_dh_makeshlibs
+override_dh_makeshlibs:
+	dh_makeshlibs -V

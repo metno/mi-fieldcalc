@@ -1,0 +1,3 @@
+usr/include/mi_fieldcalc
+usr/lib/*/libmi-fieldcalc*.so
+usr/lib/*/cmake

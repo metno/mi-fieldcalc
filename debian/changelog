@@ -1,0 +1,5 @@
+mi-fieldcalc (0.1.0-1) unstable; urgency=low
+
+  * debian packaging
+
+ -- Alexander Bürger <alexander.buerger@met.no>  Thu, 02 May 2019 08:00:08 +0200
