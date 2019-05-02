@@ -32,63 +32,69 @@
 
 #include "FieldDefined.h"
 
+#include <cmath>
 #include <string>
 #include <vector>
 
 namespace miutil {
 namespace fieldcalc {
 
+inline bool is_defined(float in, float undef)
+{
+  return !std::isnan(in) && in != undef;
+}
+
 inline bool is_defined(bool allDefined, float in1, float undef)
 {
-  return allDefined or in1 != undef;
+  return allDefined or is_defined(in1, undef);
 }
 
 inline bool is_defined(bool allDefined, float in1, float in2, float undef)
 {
-  return allDefined or (in1 != undef and in2 != undef);
+  return allDefined or (is_defined(in1, undef) and is_defined(in2, undef));
 }
 
 inline bool is_defined(bool allDefined, float in1, float in2, float in3, float undef)
 {
-  return allDefined or (in1 != undef and in2 != undef and in3 != undef);
+  return allDefined or (is_defined(in1, undef) and is_defined(in2, undef) and is_defined(in3, undef));
 }
 
 inline bool is_defined(bool allDefined, float in1, float in2, float in3, float in4, float undef)
 {
-  return allDefined or (in1 != undef and in2 != undef and in3 != undef and in4 != undef);
+  return allDefined or (is_defined(in1, undef) and is_defined(in2, undef) and is_defined(in3, undef) and is_defined(in4, undef));
 }
 
 inline bool is_defined(bool allDefined, float in1, float in2, float in3, float in4, float in5, float undef)
 {
-  return allDefined or (in1 != undef and in2 != undef and in3 != undef and in4 != undef and in5 != undef);
+  return allDefined or (is_defined(in1, undef) and is_defined(in2, undef) and is_defined(in3, undef) and is_defined(in4, undef) and is_defined(in5, undef));
 }
 
 inline bool is_defined(bool allDefined, float in1, float in2, float in3, float in4, float in5, float in6, float undef)
 {
-  return allDefined or (in1 != undef and in2 != undef and in3 != undef and in4 != undef and in5 != undef and in6 != undef);
+  return allDefined or (is_defined(in1, undef) and is_defined(in2, undef) and is_defined(in3, undef) and is_defined(in4, undef) and is_defined(in5, undef) and is_defined(in6, undef));
 }
 
 inline bool is_defined(bool allDefined, float in1, float in2, float in3, float in4, float in5, float in6, float in7, float undef)
 {
-  return allDefined or (in1 != undef and in2 != undef and in3 != undef and in4 != undef and in5 != undef and in6 != undef and in7 != undef);
+  return allDefined or (is_defined(in1, undef) and is_defined(in2, undef) and is_defined(in3, undef) and is_defined(in4, undef) and is_defined(in5, undef) and is_defined(in6, undef) and is_defined(in7, undef));
 }
 
 inline bool is_defined(bool allDefined, float in1, float in2, float in3, float in4, float in5, float in6, float in7, float in8, float undef)
 {
-  return allDefined or (in1 != undef and in2 != undef and in3 != undef and in4 != undef and in5 != undef and in6 != undef and in7 != undef and in8 != undef);
+  return allDefined or (is_defined(in1, undef) and is_defined(in2, undef) and is_defined(in3, undef) and is_defined(in4, undef) and is_defined(in5, undef) and is_defined(in6, undef) and is_defined(in7, undef) and is_defined(in8, undef));
 }
 
 inline bool is_defined(bool allDefined, float in1, float in2, float in3, float in4, float in5, float in6, float in7, float in8, float in9, float undef)
 {
   return allDefined or
-         (in1 != undef and in2 != undef and in3 != undef and in4 != undef and in5 != undef and in6 != undef and in7 != undef and in8 != undef and in9 != undef);
+         (is_defined(in1, undef) and is_defined(in2, undef) and is_defined(in3, undef) and is_defined(in4, undef) and is_defined(in5, undef) and is_defined(in6, undef) and is_defined(in7, undef) and is_defined(in8, undef) and is_defined(in9, undef));
 }
 
 inline bool is_defined(bool allDefined, float in1, float in2, float in3, float in4, float in5, float in6, float in7, float in8, float in9, float in10,
                        float undef)
 {
-  return allDefined or (in1 != undef and in2 != undef and in3 != undef and in4 != undef and in5 != undef and in6 != undef and in7 != undef and in8 != undef and
-                        in9 != undef and in10 != undef);
+  return allDefined or (is_defined(in1, undef) and is_defined(in2, undef) and is_defined(in3, undef) and is_defined(in4, undef) and is_defined(in5, undef) and is_defined(in6, undef) and is_defined(in7, undef) and is_defined(in8, undef) and
+                        is_defined(in9, undef) and is_defined(in10, undef));
 }
 
 void copy_field(float* fout, const float* fin, size_t fsize);
