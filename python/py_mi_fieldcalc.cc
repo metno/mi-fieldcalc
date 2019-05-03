@@ -81,7 +81,12 @@ py::object py_wrap_2d(F f, float undef, T1 a1, TN ... an)
   const int nx = a1.shape(0), ny = a1.shape(1);
   miutil::ValuesDefined fDefined = miutil::SOME_DEFINED;
 
-  if (!f(nx, ny, extract(a1), extract(an) ..., result.mutable_data(), fDefined, undef))
+  bool ok;
+  {
+    py::gil_scoped_release release;
+    ok = f(nx, ny, extract(a1), extract(an) ..., result.mutable_data(), fDefined, undef);
+  }
+  if (!ok)
     return py::none();
 
   return std::move(result);
