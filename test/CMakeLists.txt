@@ -42,17 +42,19 @@ LINK_LIBRARIES(
 
 ########################################################################
 
-ADD_EXECUTABLE(mi_fieldcalc_test
-  FieldCalculationsTest.cc
-  MetConstantsTest.cc
+IF(ENABLE_TESTS)
+  ADD_EXECUTABLE(mi_fieldcalc_test
+    FieldCalculationsTest.cc
+    MetConstantsTest.cc
 
-  gtestMain.cc
-)
+    gtestMain.cc
+  )
 
-TARGET_LINK_LIBRARIES(mi_fieldcalc_test
-  mi-fieldcalc
-)
+  TARGET_LINK_LIBRARIES(mi_fieldcalc_test
+    mi-fieldcalc
+  )
 
-ADD_TEST(NAME mi_fieldcal_ctest
-  COMMAND mi_fieldcalc_test --gtest_color=yes
-)
+  ADD_TEST(NAME mi_fieldcal_ctest
+    COMMAND mi_fieldcalc_test --gtest_color=yes
+  )
+ENDIF()
