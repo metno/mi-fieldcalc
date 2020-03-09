@@ -1743,8 +1743,11 @@ bool cvhum(int nx, int ny, const float* t, const float* huminp, const std::strin
   //     compute=4 : temp. og duggpunkt (Kelvin)    -> rel.fuktighet (%)
   //     compute=5 : temp. og duggpunkt (Celsius)   -> rel.fuktighet (%)
 
+  float unit_scale = 100;
   if (compute == 1 && unit == "celsius")
     compute = 2;
+  if ((compute == 4 || compute == 5) && unit == "1")
+    unit_scale = 1;
 
   const int fsize = nx * ny;
   const float tconv = (compute == 1 || compute == 2 || compute == 4) ? t0 : 0;
@@ -1796,7 +1799,7 @@ bool cvhum(int nx, int ny, const float* t, const float* huminp, const std::strin
           const float et = ewt.value();
           const float etd = ewt2.value();
           const float rh = etd / et;
-          humout[i] = rh * 100.;
+          humout[i] = rh * unit_scale;
         }
       } else {
         humout[i] = undef;
