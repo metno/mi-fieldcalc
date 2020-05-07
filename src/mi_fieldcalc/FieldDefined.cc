@@ -79,6 +79,7 @@ ValuesDefined combineDefined(ValuesDefined a, ValuesDefined b)
   case SOME_DEFINED:
     return b != ALL_DEFINED ? b : SOME_DEFINED;
   }
+  return SOME_DEFINED;
 }
 
 } // namespace MetNo
