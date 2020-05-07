@@ -54,7 +54,7 @@ IF(ENABLE_TESTS)
     mi-fieldcalc
   )
 
-  ADD_TEST(NAME mi_fieldcal_ctest
+  ADD_TEST(NAME mi_fieldcalc_test
     COMMAND mi_fieldcalc_test --gtest_color=yes
   )
 ENDIF()
