@@ -1791,7 +1791,7 @@ bool cvhum(int nx, int ny, const float* t, const float* huminp, const std::strin
         const ewt_calculator ewt(t[i] - tconv), ewt2(huminp[i] - tconv);
         if (not(ewt.defined() and ewt2.defined())) {
           humout[i] = undef;
-          n_undefined = false;
+          n_undefined += 1;
         } else {
           const float et = ewt.value();
           const float etd = ewt2.value();

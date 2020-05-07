@@ -96,7 +96,7 @@ bool vesselIcingOverland(int nx, int ny, const float* airtemp, const float* seat
 
       if (seatemp[i] < Tf) {
         icing[i] = undef;
-        n_undefined = false;
+        n_undefined += 1;
       } else {
         const double ff = miutil::absval(u[i], v[i]);
         const double ppr = ff * (Tf - airtemp[i]) / (1 + 0.3 * (seatemp[i] - Tf));
