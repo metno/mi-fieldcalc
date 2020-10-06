@@ -52,6 +52,7 @@ IF(ENABLE_TESTS)
 
   TARGET_LINK_LIBRARIES(mi_fieldcalc_test
     mi-fieldcalc
+    Threads::Threads
   )
 
   ADD_TEST(NAME mi_fieldcalc_test
