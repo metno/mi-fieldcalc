@@ -386,10 +386,10 @@ bool plevelthe(int nx, int ny, const float* t, const float* rh, float p, int com
   if (p <= 0.0)
     return false;
 
-  const float pi = fieldcalc::pi_from_p(p);
+  const float pidcp = fieldcalc::pidcp_from_p(p), pi = pidcp * cp;
   const float cvrh = 0.01 * (xlh / pi) * eps / p;
-  const float tconv = (compute == 2) ? (pi / cp) : 1;
-  const float thconv = (compute == 1) ? (cp / pi) : 1;
+  const float tconv = (compute == 2) ? pidcp : 1;
+  const float thconv = 1 / pidcp;
 
   auto func = [tconv, cvrh, thconv](float t, float rh, float undef, size_t& n_undefined) {
     return fieldcalc::tk_rh_the(t * tconv, rh * cvrh, thconv, undef, n_undefined);
