@@ -1,7 +1,7 @@
 /*
   mi-fieldcalc
 
-  Copyright (C) 2019 met.no
+  Copyright (C) 2019-2021 met.no
 
   Contact information:
   Norwegian Meteorological Institute
@@ -32,7 +32,7 @@
 
 #define MI_FIELDCALC_VERSION_MAJOR 0
 #define MI_FIELDCALC_VERSION_MINOR 1
-#define MI_FIELDCALC_VERSION_PATCH 4
+#define MI_FIELDCALC_VERSION_PATCH 5
 
 #define MI_FIELDCALC_VERSION_INT(major,minor,patch) \
     (1000000*major + 1000*minor + patch)
