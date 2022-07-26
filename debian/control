@@ -3,7 +3,7 @@ Priority: optional
 Maintainer: MET Norway <diana@met.no>
 Build-Depends:  debhelper (>= 11),
  dh-python,
- cmake,
+ cmake (>= 3.10),
  libgtest-dev,
  python3-dev,
  python3-numpy,
