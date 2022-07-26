@@ -1,7 +1,7 @@
 Source: mi-fieldcalc
 Priority: optional
 Maintainer: MET Norway <diana@met.no>
-Build-Depends:  debhelper (>= 9),
+Build-Depends:  debhelper (>= 11),
  dh-python,
  cmake,
  libgtest-dev,
