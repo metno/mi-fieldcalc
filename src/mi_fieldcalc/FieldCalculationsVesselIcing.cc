@@ -693,7 +693,7 @@ bool vesselIcingMincog(int nx, int ny, const float* sal, const float* wave, cons
   size_t n_undefined = 0;
   MIUTIL_OPENMP_PARALLEL(fsize, for reduction(+:n_undefined))
   for (int i = 0; i < fsize; i++) {
-    if (fieldcalc::is_defined(inAllDefined, sal[i], wave[i], x_wind[i], y_wind[i], airtemp[i], rh[i], sst[i], p[i], aice[i], depth[i], undef) && aice[i] < 0.4) {
+    if (fieldcalc::is_defined(inAllDefined, sal[i], wave[i], x_wind[i], y_wind[i], airtemp[i], rh[i], sst[i], p[i], aice[i], depth[i], undef) && aice[i] < 0.4 && sst[i]>(-54.1126 * sal[i] / (1000 - sal[i])) ) {
       icing[i] = vesselIcingMincog(sal[i], wave[i], x_wind[i], y_wind[i], airtemp[i], rh[i], sst[i], p[i], Pw[i], /*aice[i],*/ depth[i], vs, alpha, zmin, zmax, alt);
     } else {
       icing[i] = undef;
