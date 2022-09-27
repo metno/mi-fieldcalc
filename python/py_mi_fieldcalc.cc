@@ -98,9 +98,25 @@ py::object py_kIndex(npa_t t500, npa_t t700, npa_t rh700, npa_t t850, npa_t rh85
   return py_wrap_2d(fc::kIndex, undef, t500,  t700,  rh700,  t850,  rh850, p500, p700, p850, compute);
 }
 
+// bool ductingIndex(int nx, int ny, const float* t850, const float* rh850, float p850, int compute, float* duct, ValuesDefined& fDefined, float undef);
 py::object py_ductingIndex(npa_t t850, npa_t rh850, float p850, int compute, float undef)
 {
   return py_wrap_2d(fc::ductingIndex, undef, t850, rh850, p850, compute);
+}
+
+py::object py_contrailsMask(npa_t t, npa_t p, npa_t q, float undef)
+{
+  return py_wrap_2d(fc::contrailsMask, undef, t, p, q);
+}
+
+py::object py_contrailsMaskModelLevels(npa_t t, npa_t q, npa_t ps, float alevel, float blevel, float undef)
+{
+  return py_wrap_2d(fc::contrailsMaskModelLevels, undef, t, q, ps, alevel, blevel);
+}
+
+py::object py_pressureFieldFromHybrid(npa_t ps, float alevel, float blevel, float undef)
+{
+  return py_wrap_2d(fc::pressureFieldFromHybrid, undef, ps, alevel, blevel);
 }
 
 py::object py_showalterIndex(npa_t t500, npa_t t850, npa_t rh850, float p500, float p850, int compute, float undef)
@@ -202,4 +218,7 @@ PYBIND11_MODULE(mi_fieldcalc, m)
   M_DEF_FC(vesselIcingMertins);
   M_DEF_FC(vesselIcingModStall);
   M_DEF_FC(vesselIcingMincog);
+  M_DEF_FC(contrailsMask);
+  M_DEF_FC(contrailsMaskModelLevels);
+  M_DEF_FC(pressureFieldFromHybrid);
 }

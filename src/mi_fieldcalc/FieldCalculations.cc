@@ -3117,5 +3117,235 @@ MESAN Mesoskalig analys, SMHI RMK Nr 75, Mars 1997.
   return true;
 }
 
+inline float tk_pamb_rh_contrails(float t, float rhamb, float pamb, bool debug)
+{
+
+  // SI units
+  // t in K
+  // p in hPa
+  // q humidity kg/kg
+
+  float tc_i = t - 273.16;
+  if ( debug ) {
+    printf("tc_i  %f \n", tc_i);
+    printf("rhamb %f \n", rhamb);
+    printf("pamb  %f \n", pamb);
+    printf("t     %f \n", t);
+  }
+
+  // Physical constants used
+
+  // Absolute T
+  float t0 = 273.16;
+  // Gas constant for dry air
+  float rd = 287.05;
+  // Gas constant for H2O
+  float rh2o = 461.5;
+  // Specific  heat capacity of air
+  float cp = 1.005;
+  // Boltzman's constant
+
+  // liquid saturation
+  float bal = 6.1121;
+  float bbl = 18.729;
+  float bcl = 257.87;
+  float bdl = 227.3;
+
+  // Heat liberated per gram fuel (Karcher [1994]??)
+  float delh = 42.;
+  // Water vapor mixing ratio in exhaust
+  float wexh = 1.25;
+  // dbg: adjust wexh
+  // wexh = 1.3
+  // fraction of combustion heat converted to propulsion
+  float effic = 0.3;
+
+  // Initialisation
+  float tamax = -32.0;
+  float tamin = -62.0;
+  float tamb = 0.5*(tamin+tamax);
+  float dTmin = 0.0;
+  float dTmax = 100.0;
+  float dT = 10.0;
+  // No need to compute this in the inner loops
+  float C1 = 1.e-3*pamb*wexh*cp*rh2o / (bal*delh*(1. - effic)*rd);
+  float C2 = 1.0e3;  // scaling of equations, might be removed
+  float rha1 = rhamb;
+  if (rhamb >= 0.9999) { rha1 = 0.9999; }
+  float bdli = 1.0 / bdl;
+  // iteration control
+  int mxiter = 10;
+  int iter;
+  float eps1 = 1.0e-8;
+  float eps2 = 1.0e-4;
+
+  // Find tamb and deltaT simultaneously by Newton iteration
+  // by solving slplume(dT,tamb) - 1 = 0 and d(slplume)/d(dT) = 0 (for max.)
+  // The iterations don't always converge
+  // It works OK if we restrict to tamin < tamb < tamax and dTmin < dT < dTmax
+  //  cout << "s1     s2      ta       dT     a11    a22    d1     d2" << endl;
+  for (iter = 0; iter <= mxiter; ++iter) {
+    float tp = tamb + dT;   // tplume
+    float ga = (bbl - tamb * bdli) * tamb / (tamb + bcl);
+    float gp = (bbl - tp * bdli) * tp / (tp + bcl);
+    float fa = exp(ga) / (tamb + t0);
+    float fp = exp(gp) / (tp + t0);
+    float gda = (bbl*bcl - bdli*tamb*(tamb+2.*bcl))/((tamb+bcl)*(tamb+bcl));
+    float gdp = (bbl*bcl - bdli*tp*(tp+2.*bcl))/((tp+bcl)*(tp+bcl));
+    float ta0i = 1.0/(tamb+t0);
+    float tp0i = 1.0/(tp+t0);
+    float fda = fa*(gda - ta0i);
+    float fdp = fp*(gdp - tp0i);
+    float gddp = -2.0*(bdli + gdp)/(tp + bcl);
+    float s2 = rha1*fa + C1*dT*ta0i - fp;  // s2 is slplume(dT,tamb) - 1
+    float s1 = C2*(C1*ta0i - (s2 + fp)*(gdp - tp0i));  // s1 is d(slplume)/d(dT)
+    float atmp = C2*(s2 + fp)*(gddp + tp0i*tp0i);
+    float a11 = -C2*C1*ta0i*(gdp - tp0i) - atmp; // a11 is d�(slplume)/d(dT)�
+    float a22 = rha1*fda - C1*dT*ta0i*ta0i - fdp;
+    float a21 = C1*ta0i - fdp;
+    float a12 = -C2*C1*ta0i*ta0i - C2*(a22 + fdp)*(gdp - tp0i) - atmp;
+    // if a11 becomes >= 0, there is no max for deltaT in the plume
+    if ( a11 > -eps1 ) {
+      //      cerr << "a11 too big: " << a11 << " Abort!" << endl;
+      // cerr << "a11 too big: " << a11 << endl;
+      // cerr << "iter,a21,a12,a22,s1,s2=" << iter <<" "<< a21 <<" "<< a12 <<" "<< a22 <<" "<< s1 <<" "<< s2 << endl;
+      // cerr << "pamb: " << pamb << endl;
+      // cerr << "rhamb: " << rhamb << endl;
+      // cerr << "determinant: " << a11*a22 - a12*a21;
+      if ( debug ) { printf("Break1\n");}
+      break;
+    }
+    // Solve equation system by gaussian elimination on the 2x2 Jacobian aij
+    float qq = a21/a11;
+    float dta = (qq*s1 - s2)/(a22 - qq*a12); // check determinant ??
+    float ddT = (-s1 - a12*dta)/a11;
+    //    float d1 = a11*ddT + a12*dta + s1;  //for debug, d1 should be 0
+    //    float d2 = a21*ddT + a22*dta + s2;  //for debug, d2 should be 0
+    // Restrict step length to be inside min,max box
+    float alfa = 1.0;
+    if ( tamb+alfa*dta < tamin ) {
+      alfa = (tamin-tamb)/dta;
+    } else if ( tamb+alfa*dta > tamax ) {
+      alfa = (tamax-tamb)/dta;
+    }
+    if ( dT+alfa*ddT < dTmin ) {
+      alfa = (dTmin-dT)/ddT;
+    } else if ( dT+alfa*ddT > dTmax ) {
+      alfa = (dTmax-dT)/ddT;
+    }
+    //    if ( alfa < 0.0 ) {  //debug only, should not happen
+    //      cerr << "alfa became negative: " << alfa << " Abort!" << endl;
+    //      exit(1);
+    //    }
+    // Update variables and check for convergence
+    tamb = tamb + alfa*dta;
+    dT = dT + alfa*ddT;
+    //    cout << s1 <<" "<< s2 <<" "<< tamb <<" "<< dT <<" "<< a11 <<" "<< a22 <<" "<< d1 <<" "<< d2 << endl;
+    if ( (dta*dta + ddT*ddT) < eps2 ) {
+      if ( debug ){ printf("Break2\n");}
+      break;
+    }
+  }
+  float Tlc;
+  if (iter < mxiter) {
+    Tlc = tamb;
+  } else {
+    //cout << "pamb: " << pamb << endl;
+    //cout << "rhamb: " << rhamb << endl;
+    //    cout << "max iterations reached, tamb: " << tamb << endl;
+    if ( debug ) { printf("max iterations reached\n");}
+    Tlc = tamin;
+  }
+
+  if ( debug ) { printf("Tlc    %f \n", Tlc);}
+  float mask;
+  if (Tlc > tc_i){
+    mask = 1;
+  }else{
+    mask = 0;
+  }
+  return mask;
+}
+
+bool contrailsMask(int nx, int ny, const float *t, const float *p, const float *q, float* mask, ValuesDefined& fDefined, float undef){
+
+  // SI units
+  // t in K
+  // p in Pa
+  // q humidity kg/kg
+
+  const int fsize = nx * ny;
+  const bool inAllDefined = fDefined == miutil::ALL_DEFINED;
+  size_t n_undefined = 0;
+  MIUTIL_OPENMP_PARALLEL(fsize, for reduction(+:n_undefined))
+  for (int i = 0; i < fsize; i++) {
+    if (fieldcalc::is_defined(inAllDefined, p[i], t[i], q[i], undef)) {
+
+      float pamb = p[i] * 0.01;
+      float rh = fieldcalc::tk_q_rh(t[i], q[i], pamb, undef, n_undefined)/100.;
+      if ( rh > 1 ){
+        rh = 1.;
+        // printf("Truncate rh\n");
+      }
+      mask[i] = tk_pamb_rh_contrails(t[i], rh, pamb, false);
+ 
+    }else{
+      mask[i] = undef;
+      n_undefined += 1;
+    }
+  }
+  fDefined = miutil::checkDefined(n_undefined, fsize);
+  return true;
+}
+
+bool contrailsMaskModelLevels(int nx, int ny, const float *t, const float *q, const float *ps, float alevel,  float blevel, float* mask, ValuesDefined& fDefined, float undef){
+
+  // SI units
+  // t in K
+  // p in Pa
+  // q humidity kg/kg
+
+  const int fsize = nx * ny;
+  const bool inAllDefined = fDefined == miutil::ALL_DEFINED;
+  size_t n_undefined = 0;
+  MIUTIL_OPENMP_PARALLEL(fsize, for reduction(+:n_undefined))
+  for (int i = 0; i < fsize; i++) {
+    if (fieldcalc::is_defined(inAllDefined, ps[i], t[i], q[i], undef)) {
+
+      float pamb = fieldcalc::p_hlevel(ps[i], alevel, blevel) * 0.01;
+      float rh = fieldcalc::tk_q_rh(t[i], q[i], pamb, undef, n_undefined)/100.;
+      if ( rh > 1 ){
+        rh = 1.;
+        // printf("Truncate rh\n");
+      }
+      mask[i] = tk_pamb_rh_contrails(t[i], rh, pamb, false);
+
+    }else{
+      mask[i] = undef;
+      n_undefined += 1;
+    }
+  }
+  fDefined = miutil::checkDefined(n_undefined, fsize);
+  return true;
+}
+
+bool pressureFieldFromHybrid(int nx, int ny, const float *ps, float alevel,  float blevel, float* pressure, ValuesDefined& fDefined, float undef){
+
+  const int fsize = nx * ny;
+  const bool inAllDefined = fDefined == miutil::ALL_DEFINED;
+  size_t n_undefined = 0;
+  MIUTIL_OPENMP_PARALLEL(fsize, for reduction(+:n_undefined))
+  for (int i = 0; i < fsize; i++) {
+    if (fieldcalc::is_defined(inAllDefined, ps[i], undef)) {
+      pressure[i] = fieldcalc::p_hlevel(ps[i], alevel, blevel);
+    }else{
+      pressure[i] = undef;
+      n_undefined += 1;
+    }
+  }
+  fDefined = miutil::checkDefined(n_undefined, fsize);
+  return true;
+}
+
 } // namespace fieldcalc
 } // namespace miutil
