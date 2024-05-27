@@ -25,13 +25,26 @@
 # along with mi-fieldcalc; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-EXECUTE_PROCESS(OUTPUT_VARIABLE PYTHON_INSTALL_LIBDIR
-  RESULT_VARIABLE PYTHON_INSTALL_EXIT_STATUS
-  COMMAND ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig as ds; import sys; sys.stdout.write(ds.get_python_lib(plat_specific=True, prefix='${CMAKE_INSTALL_PREFIX}'))")
-IF (PYTHON_INSTALL_EXIT_STATUS)
-  MESSAGE(FATAL_ERROR "Could not find python library install directory")
+IF (PYTHON_INSTALL_LIBDIR)
+  MESSAGE (STATUS "Configured PYTHON_INSTALL_LIBDIR='${PYTHON_INSTALL_LIBDIR}'")
 ELSE ()
-  MESSAGE (STATUS "Python library install directory=${PYTHON_INSTALL_LIBDIR}")
+  EXECUTE_PROCESS(OUTPUT_VARIABLE PYTHON_INSTALL_LIBDIR
+    RESULT_VARIABLE PYTHON_INSTALL_EXIT_STATUS
+    COMMAND ${Python_EXECUTABLE} -c "
+import sys
+if sys.version_info >= (3, 10):
+  import sysconfig as s
+  pl = s.get_path('platlib', 'posix_prefix', vars={'platbase':'${CMAKE_INSTALL_PREFIX}'})
+else:
+  from distutils import sysconfig as ds
+  pl = ds.get_python_lib(plat_specific=True, prefix='${CMAKE_INSTALL_PREFIX}')
+sys.stdout.write(pl)
+")
+  IF (PYTHON_INSTALL_EXIT_STATUS)
+    MESSAGE(FATAL_ERROR "Could not detect PYTHON_INSTALL_LIBDIR")
+  ELSE ()
+    MESSAGE (STATUS "Detected PYTHON_INSTALL_LIBDIR='${PYTHON_INSTALL_LIBDIR}'")
+  ENDIF()
 ENDIF()
 
 SET(py_SOURCES
@@ -57,7 +70,7 @@ SET(py_TESTS
 IF(ENABLE_TESTS)
   FOREACH(T ${py_TESTS})
     ADD_TEST(NAME ${T}
-      COMMAND ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/${T}"
+      COMMAND ${Python_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/${T}"
       )
   ENDFOREACH()
   SET_TESTS_PROPERTIES(${py_TESTS}

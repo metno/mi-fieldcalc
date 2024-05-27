@@ -26,7 +26,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 PROJECT(mi-fieldcalc LANGUAGES CXX)
-CMAKE_MINIMUM_REQUIRED(VERSION 3.10)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 INCLUDE(MetnoUtils)
@@ -62,6 +62,7 @@ ADD_SUBDIRECTORY(test)
 
 OPTION(ENABLE_PYTHON "Enable python binding" ON)
 IF(ENABLE_PYTHON)
+  FIND_PACKAGE (Python COMPONENTS Interpreter Development)
   SET (PYBIND11_3RDPARTY "third_party/pybind11")
   IF ((NOT pybind11_DIR) AND (EXISTS "${CMAKE_SOURCE_DIR}/${PYBIND11_3RDPARTY}/CMakeLists.txt"))
     MESSAGE(STATUS "Including pybind11 project from ${PYBIND11_3RDPARTY}")
