@@ -13,7 +13,7 @@ PY_VERSION = $(shell python3 --version | sed -e 's,Python \([0-9]\+\.[0-9]\+\).*
 .PHONY: override_dh_auto_configure version-check
 override_dh_auto_configure: version-check
 	dh_auto_configure -- \
-	  -DPYBIND11_PYTHON_VERSION=$(PY_VERSION) -DPython_ADDITIONAL_VERSIONS=$(PY_VERSION)
+	 -DPYTHON_INSTALL_LIBDIR=/usr/lib/python3/dist-packages
 
 version-check:
 	@ V_MAJOR=`grep '^#define .*_VERSION_MAJOR ' "${V_HEADER_FILE}" | cut -d' ' -f3` ; \
