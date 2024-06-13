@@ -32,7 +32,7 @@
 
 #define MI_FIELDCALC_VERSION_MAJOR 0
 #define MI_FIELDCALC_VERSION_MINOR 1
-#define MI_FIELDCALC_VERSION_PATCH 6
+#define MI_FIELDCALC_VERSION_PATCH 7
 
 #define MI_FIELDCALC_VERSION_INT(major,minor,patch) \
     (1000000*major + 1000*minor + patch)
