@@ -67,7 +67,14 @@ bool same_dims(npa_t var1, T2 var2, TN... var3)
 inline const float* extract(npa_t npa) { return npa.data(); }
 
 template<typename T>
-inline T extract(const T& t) { return t; }
+inline const T& extract(const T& t) { return t; }
+
+template <typename F, typename T1, typename ... TN>
+bool call_with_gil_released(F f, int nx, int ny, float* result, miutil::ValuesDefined& fDefined, float undef, T1 a1, TN ... an)
+{
+  py::gil_scoped_release release;
+  return f(nx, ny, a1, an ..., result, fDefined, undef);
+}
 
 template <typename F, typename T1, typename ... TN>
 py::object py_wrap_2d(F f, float undef, T1 a1, TN ... an)
@@ -81,11 +88,7 @@ py::object py_wrap_2d(F f, float undef, T1 a1, TN ... an)
   const int nx = a1.shape(0), ny = a1.shape(1);
   miutil::ValuesDefined fDefined = miutil::SOME_DEFINED;
 
-  bool ok;
-  {
-    py::gil_scoped_release release;
-    ok = f(nx, ny, extract(a1), extract(an) ..., result.mutable_data(), fDefined, undef);
-  }
+  const bool ok = call_with_gil_released(f, nx, ny, result.mutable_data(), fDefined, undef, extract(a1), extract(an) ...);
   if (!ok)
     return py::none();
 
