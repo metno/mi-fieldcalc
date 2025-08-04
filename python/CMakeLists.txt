@@ -58,6 +58,12 @@ TARGET_LINK_LIBRARIES(${py_MODULE}
   PRIVATE
   mi-fieldcalc
 )
+# see https://pybind11.readthedocs.io/en/stable/faq.html#recursive-template-instantiation-exceeded-maximum-depth-of-256
+# the culprits seem to be functions vesselIcingModStall and vesselIcingMincog which have 17 arguments
+TARGET_COMPILE_OPTIONS(${py_MODULE}
+  PRIVATE
+  -ftemplate-depth=2048
+)
 
 INSTALL(TARGETS ${py_MODULE}
   LIBRARY DESTINATION "${PYTHON_INSTALL_LIBDIR}"
