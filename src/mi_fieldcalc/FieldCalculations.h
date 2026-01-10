@@ -302,6 +302,12 @@ bool neighbourFunctions(int nx, int ny, const float* field, const std::vector<fl
 
 bool snow_in_cm(int nx, int ny, const float* snow_water, const float* tk2m, const float* td2m, float* snow_cm, ValuesDefined& fDefined, float undef);
 
+bool contrailsMask(int nx, int ny, const float *t, const float *p, const float *q, float* mask, ValuesDefined& fDefined, float undef);
+
+bool contrailsMaskModelLevels(int nx, int ny, const float *t, const float *q, const float *ps, float alevel, float blevel, float* mask, ValuesDefined& fDefined, float undef);
+
+bool pressureFieldFromHybrid(int nx, int ny, const float *ps, float alevel,  float blevel, float* pressure, ValuesDefined& fDefined, float undef);
+
 } // namespace fieldcalc
 } // namespace miutil
 
